@@ -8,7 +8,7 @@ import dj_database_url
 # --------------------------
 # Basic paths
 # --------------------------
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # --------------------------
 # Security
@@ -79,7 +79,8 @@ WSGI_APPLICATION = 'morse_web.wsgi.application'
 # --------------------------
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.dummy'
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
