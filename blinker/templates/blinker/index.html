@@ -1,0 +1,50 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <title>Morse Blinker</title>
+    <link rel="stylesheet" href="{% static 'blinker/css/styles.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'blinker/images/favicon.ico' %}">
+</head>
+<body>
+
+    <script>
+        const stylesData = {
+            {% for style_name, frames_dict in styles_data.items %}
+            "{{ style_name }}": {
+                {% for frame_type, frames in frames_dict.items %}
+                "{{ frame_type }}": [
+                    {% for frame in frames %}
+                    "{% static frame %}"{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        };
+        </script>
+
+    <div id="status-box" class="status">
+        Just start talking...
+    </div>
+
+    <div>
+        <input type="text" id="text-input" placeholder="Or type text">
+        <button id="send-text">Send Text</button>
+    </div>
+
+    <div id="text-display"></div>
+    <canvas id="waveform" width="600" height="100"></canvas>
+    <div id="blinker-container">
+        <img id="blinker-image" src="" width="400">
+    </div>
+
+
+        
+
+    <script src="{% static 'blinker/js/main.js' %}"></script>
+</body>
+</html>

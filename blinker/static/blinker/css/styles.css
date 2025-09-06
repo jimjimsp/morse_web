@@ -1,0 +1,15 @@
+body { font-family: Arial, sans-serif; text-align: center; }
+
+#text-display { font-size: 24px; margin: 10px; }
+canvas { background: black; display: block; margin: 10px auto; }
+
+#blinker-container {
+    width: 60vw;      /* 30% of viewport width */
+    margin: 0 auto;
+}
+
+#blinker-image {
+    width: 100%;
+    height: auto;   /* maintain aspect ratio */
+    display: block;
+}
