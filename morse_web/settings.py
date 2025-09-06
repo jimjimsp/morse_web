@@ -78,9 +78,9 @@ WSGI_APPLICATION = 'morse_web.wsgi.application'
 # Database (default SQLite)
 # --------------------------
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv("DATABASE_URL")
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.dummy'
+    }
 }
 
 # --------------------------
