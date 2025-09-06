@@ -2,6 +2,9 @@
 
 from pathlib import Path
 
+import os
+import dj_database_url
+
 # --------------------------
 # Basic paths
 # --------------------------
@@ -10,9 +13,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --------------------------
 # Security
 # --------------------------
-SECRET_KEY = 'django-insecure-u8v#z$k@5l!p2q7w9r1t^d%f0x&h3j6m'  # replace if deploying
-DEBUG = True
-ALLOWED_HOSTS = []
+DEBUG = os.getenv("DEBUG", "False") == "True"
+SECRET_KEY = os.getenv("SECRET_KEY", "changeme")
+ALLOWED_HOSTS = ["*"]  # Render will handle domain
 
 # --------------------------
 # Installed apps
@@ -38,6 +41,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',       # required
     'django.contrib.messages.middleware.MessageMiddleware',          # required
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware"
 ]
 
 # --------------------------
@@ -73,10 +78,9 @@ WSGI_APPLICATION = 'morse_web.wsgi.application'
 # Database (default SQLite)
 # --------------------------
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=os.getenv("DATABASE_URL")
+    )
 }
 
 # --------------------------
@@ -109,6 +113,7 @@ USE_TZ = True
 # Static files
 # --------------------------
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_DIRS = [
     BASE_DIR / "blinker" / "static",
@@ -120,4 +125,3 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # For production (collectstatic)
-STATIC_ROOT = BASE_DIR / "staticfiles"
