@@ -41,28 +41,29 @@ for (const styleKey in stylesData) {
 async function blinkFrames(symbol) {
     const sequence = ['half_closed', 'closed', 'half_open', 'open'];
     const styleKey = `style${currentStyle}`;
-    const framesForStyle = preloadedFrames[styleKey]; // use preloaded images
+    const framesForStyle = stylesData[styleKey];
 
     if (!framesForStyle) return;
-    const frameFolder = sequence; // same for dot/dash
+
     const totalDuration = symbol === '.' ? DOT_DURATION : DASH_DURATION;
 
-    for (let type of frameFolder) {
+    for (let type of sequence) {
         const frames = framesForStyle[type];
         if (!frames || frames.length === 0) continue;
 
-        const frameDuration = totalDuration / (frameFolder.length * frames.length);
+        const frameDuration = totalDuration / (sequence.length * frames.length);
 
         for (let framePath of frames) {
             blinkerImage.src = framePath;
 
-            // let browser paint before sleeping
+            // Give browser time to repaint before next frame
             await new Promise(requestAnimationFrame);
 
             await new Promise(r => setTimeout(r, frameDuration));
         }
     }
 }
+
 
 
 // === Beep playback ===
