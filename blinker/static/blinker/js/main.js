@@ -23,25 +23,43 @@ const textDisplay = document.getElementById('text-display');
 const waveformCanvas = document.getElementById('waveform');
 const ctx = waveformCanvas.getContext('2d');
 
+// Preload all images into memory
+const preloadedFrames = {};
+
+for (const styleKey in stylesData) {
+    preloadedFrames[styleKey] = {};
+    for (const type in stylesData[styleKey]) {
+        preloadedFrames[styleKey][type] = stylesData[styleKey][type].map(path => {
+            const img = new Image();
+            img.src = path;
+            return img;
+        });
+    }
+}
+
 // === Blink frames ===
 async function blinkFrames(symbol) {
     const sequence = ['half_closed', 'closed', 'half_open', 'open'];
     const styleKey = `style${currentStyle}`;
-    const framesForStyle = stylesData[styleKey];
+    const framesForStyle = preloadedFrames[styleKey]; // use preloaded images
 
     if (!framesForStyle) return;
 
-    const frameFolder = symbol === '.' ? sequence : sequence; // same sequence for dot/dash
+    const frameFolder = sequence; // same sequence for dot/dash
     for (let type of frameFolder) {
         const frames = framesForStyle[type];
         if (!frames || frames.length === 0) continue;
 
-        for (let framePath of frames) {
-            blinkerImage.src = framePath;
-            await new Promise(r => setTimeout(r, (symbol === '.' ? DOT_DURATION : DASH_DURATION) / frames.length));
+        const duration = symbol === '.' ? DOT_DURATION : DASH_DURATION;
+        const frameDuration = duration / frames.length;
+
+        for (let img of frames) {
+            blinkerImage.src = img.src;
+            await new Promise(r => setTimeout(r, frameDuration));
         }
     }
 }
+
 
 // === Beep playback ===
 function playBeep(symbol) {
@@ -124,10 +142,22 @@ recognition.onresult = (event) => {
 
 recognition.onerror = (event) => {
     console.error("Speech recognition error:", event.error);
-    setStatus("Just start talking...");
-    // Restart listening after error
-    startRecognition();
+    if (event.error === "no-speech") {
+        // restart after short delay
+        setTimeout(() => {
+            try { recognition.start(); } catch (e) { console.warn("Restart failed:", e); }
+        }, 500);
+    }
 };
+
+recognition.onend = () => {
+    // always restart, unless Morse is currently playing
+    if (textDisplay.innerText !== "Done!") return;  
+    setTimeout(() => {
+        try { recognition.start(); } catch (e) { console.warn("Recognition already running:", e); }
+    }, 500);
+};
+
 
 // Initially show message and start recognition
 setStatus("Just start talking...");
