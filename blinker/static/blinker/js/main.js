@@ -44,17 +44,21 @@ async function blinkFrames(symbol) {
     const framesForStyle = preloadedFrames[styleKey]; // use preloaded images
 
     if (!framesForStyle) return;
+    const frameFolder = sequence; // same for dot/dash
+    const totalDuration = symbol === '.' ? DOT_DURATION : DASH_DURATION;
 
-    const frameFolder = sequence; // same sequence for dot/dash
     for (let type of frameFolder) {
         const frames = framesForStyle[type];
         if (!frames || frames.length === 0) continue;
 
-        const duration = symbol === '.' ? DOT_DURATION : DASH_DURATION;
-        const frameDuration = duration / frames.length;
+        const frameDuration = totalDuration / (frameFolder.length * frames.length);
 
-        for (let img of frames) {
-            blinkerImage.src = img.src;
+        for (let framePath of frames) {
+            blinkerImage.src = framePath;
+
+            // let browser paint before sleeping
+            await new Promise(requestAnimationFrame);
+
             await new Promise(r => setTimeout(r, frameDuration));
         }
     }
@@ -117,6 +121,7 @@ recognition.interimResults = false;
 recognition.maxAlternatives = 1;
 
 function startRecognition() {
+    if (recognition && recognition.running) return;
     setStatus("Listening...");
     recognition.start();
 }
@@ -152,6 +157,7 @@ recognition.onerror = (event) => {
 
 recognition.onend = () => {
     // always restart, unless Morse is currently playing
+    console.log("Recognition ended, restarting...");
     if (textDisplay.innerText !== "Done!") return;  
     setTimeout(() => {
         try { recognition.start(); } catch (e) { console.warn("Recognition already running:", e); }
